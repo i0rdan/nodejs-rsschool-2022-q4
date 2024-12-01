@@ -1,0 +1,39 @@
+version: '3'
+services:
+  postgres:
+    container_name: postgres
+    restart: always
+    image: postgres
+    networks:
+      - webnet
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - postgres_data:${POSTGRES_DATA}
+      - postgres_logs:${POSTGRES_LOGS}
+  api:
+    container_name: api
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/logs
+    command: npm run start:dev
+    env_file:
+      - .env
+    networks:
+      - webnet
+    depends_on:
+      - postgres
+networks:
+  webnet:
+    driver: bridge
+volumes:
+  postgres_data:
+  postgres_logs:
